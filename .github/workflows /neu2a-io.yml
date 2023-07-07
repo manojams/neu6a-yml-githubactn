@@ -1,0 +1,55 @@
+name: Yocto Build
+
+on:
+  push:
+    branches:
+      - main
+
+machine: neu2a-io
+
+jobs:
+  build:
+    name: Build Yocto
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: |
+          mkdir neu2aYctBuild
+          cd neu2aYctBuild
+          sudo apt-get update
+                  sudo apt-get install -y gawk wget git-core diffstat unzip texinfo gcc-multilib build-essential chrpath socat cpio  xz-utils debianutils iputils-ping libsdl1.2-dev xterm
+
+      - name: Clone Yocto Poky repository
+        run: |
+          git clone git://git.yoctoproject.org/poky.git  ./neu2aYctBuild/
+
+      - name: Clone bitbake repository
+        run: |
+          git clone git://git.openembedded.org/bitbake -b master  ./neu2aYctBuild/
+
+      - name: Clone openembedded-core repository
+        run: |
+          git clone git://git.openembedded.org/openembedded-core -b kirkstone  ./neu2aYctBuild/
+
+      - name: Clone meta-arm repository
+        run: |
+         git clone git://git.yoctoproject.org/meta-arm -b kirkstone  ./neu2aYctBuild/
+
+      - name: Clone meta-openembedded repository
+        run: |
+         git clone git://git.openembedded.org/meta-openembedded -b kirkstone  ./neu2aYctBuild/
+
+      - name: Clone meta neu2a layer
+        run: git clone https://github.com/edgeble/meta-neu6b.git -b kirkstone ./neu2aYctBuild/
+
+      - name: Build Yocto
+        run: |
+          cd neu2aYctBuild
+          source oe-init-build-env
+          bitbake core-image-minimal
+
+      # Add additional steps if needed, such as deploying the build artifacts
